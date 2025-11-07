@@ -231,168 +231,46 @@
             text-align: left;
         }
         
-        .settings-table th {
-            background-color: #f2f2f2;
-        }
         
     </style>
 </head>
 <body>
     <div class="header">
         <h1>Invoice Assistant</h1>
-        <button class="settings-btn" onclick="openSettings()">Customer Document Setting</button>
+        <button class="settings-btn" onclick="openSettings()">Settings</button>
     </div>
-    
     <div class="container">
         <div class="nav-tabs">
-            <div class="tab active" onclick="showTab('customer-doc')">Customer Document Parsing</div>
-            <div class="tab" onclick="showTab('sap-doc')">SAP Document Parsing</div>
-            <div class="tab" onclick="showTab('processing')">Data Processing</div>
-            <div class="tab" onclick="showTab('results')">Aggregation Results</div>
-            <div class="tab" onclick="showTab('id-mapping')">ID Mapping Management</div>
+            <div class="tab active" onclick="showTab('upload')">Upload</div>
+            <div class="tab" onclick="showTab('mapping')">Mapping</div>
+            <div class="tab" onclick="showTab('results')">Results</div>
         </div>
-        
-        <!-- Customer Document Parsing Interface -->
-        <div id="customer-doc" class="tab-content active">
-            <h2>Customer Document Parsing</h2>
+        <div id="upload" class="tab-content active">
             <div class="form-group">
-                <label for="customer-file">Upload Customer Document:</label>
-                <input type="file" id="customer-file" accept=".pdf,.doc,.docx,.xls,.xlsx">
+                <label for="file-upload">Upload File:</label>
+                <input type="file" id="file-upload">
             </div>
-            
             <div class="form-group">
-                <label for="supplier">Select Supplier:</label>
-                <select id="supplier">
-                    <option value="">Please Select Supplier</option>
-                    <option value="supplier1">Supplier 1</option>
-                    <option value="supplier2">Supplier 2</option>
-                    <option value="supplier3">Supplier 3</option>
+                <label for="customer-name">Customer Name:</label>
+                <input type="text" id="customer-name">
+            </div>
+            <div class="form-group">
+                <label for="document-type">Document Type:</label>
+                <select id="document-type">
+                    <option value="excel">Excel</option>
+                    <option value="image">Image</option>
+                    <option value="email">Email</option>
+                    <option value="pdf">PDF</option>
                 </select>
             </div>
-            
-            <div class="form-group">
-                <label for="customer-period">Select Period:</label>
-                <input type="month" id="customer-period">
-            </div>
-            
-            <button onclick="parseCustomerDoc()">Parse Document</button>
-            
-            <div id="customer-results">
-                <h3>Parsing Results</h3>
-                <table id="customer-data-table">
-                    <thead>
-                        <tr>
-                            <th>客户材料号</th>
-                            <th>客户单价</th>
-                            <th>客户总价</th>
-                            <th>客户数量</th>
-                            <th>Supplier</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <!-- Parsing results will be displayed here -->
-                    </tbody>
-                </table>
-            </div>
-        </div>
-        
-        <!-- SAP Document Parsing Interface -->
-        <div id="sap-doc" class="tab-content">
-            <h2>SAP Document Parsing</h2>
-            <div class="form-group">
-                <label for="sap-file">Upload SAP Document:</label>
-                <input type="file" id="sap-file" accept=".pdf,.doc,.docx,.xls,.xlsx">
-            </div>
-            
-            <div class="form-group">
-                <label for="sap-period">Select Period:</label>
-                <input type="month" id="sap-period">
-            </div>
-            
-            <button onclick="parseSapDoc()">Parse Document</button>
-            
-            <div id="sap-results">
-                <h3>Parsing Results</h3>
-                <table id="sap-data-table">
-                    <thead>
-                        <tr>
-                            <th>SAP料号</th>
-                            <th>SAP数量</th>
-                            <th>SAP单价</th>
-                            <th>SAP总价</th>
-                            <th>客户</th>
-
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <!-- Parsing results will be displayed here -->
-                    </tbody>
-                </table>
-            </div>
-        </div>
-        
-        <!-- Data Processing Interface -->
-        <div id="processing" class="tab-content">
-            <h2>Data Processing</h2>
-            <button onclick="startProcessing()">Start Processing</button>
-            
+            <button onclick="processFile()">Process File</button>
             <div class="progress-container">
-                <h3>Processing Progress</h3>
                 <div class="progress-bar">
-                    <div id="progress-fill" class="progress-fill">0%</div>
+                    <div class="progress-fill" id="progress-fill"></div>
                 </div>
-            </div>
-            
-            <div id="processing-steps">
-                <h3>Processing Steps</h3>
-                <ul>
-                    <li id="step1">Customer Data Aggregation <span id="step1-status">Pending</span></li>
-                    <li id="step2">SAP Data Aggregation <span id="step2-status">Pending</span></li>
-                    <li id="step3">Data Matching <span id="step3-status">Pending</span></li>
-                </ul>
             </div>
         </div>
-        
-        <!-- Aggregation Results Interface -->
-        <div id="results" class="tab-content">
-            <h2>Aggregation Results</h2>
-            
-            <div class="result-filters">
-                <div class="form-group">
-                    <label for="result-supplier">Select Supplier:</label>
-                    <select id="result-supplier">
-                        <option value="">All Suppliers</option>
-                        <option value="supplier1">Supplier 1</option>
-                        <option value="supplier2">Supplier 2</option>
-                        <option value="supplier3">Supplier 3</option>
-                    </select>
-                </div>
-                
-                <div class="form-group">
-                    <label for="result-period">Select Period:</label>
-                    <input type="month" id="result-period">
-                </div>
-                
-                <button onclick="filterResults()">Filter</button>
-            </div>
-            
-            <table id="aggregation-results">
-                <thead>
-                    <tr>
-                        <th>SAP料号</th><th>描述</th><th>SAP单价</th><th>SAP数量</th><th>SAP总价</th><th>客户料号</th><th>客户数量</th><th>客户总价</th><th>客户单价</th><th>CR数量</th><th>CR金额</th><th>单价一致性</th><th>价差</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <!-- Aggregation results will be displayed here -->
-                </tbody>
-            </table>
-        </div>
-        
-        <!-- ID Mapping Management Interface -->
-        <div id="id-mapping" class="tab-content">
-            <h2>ID Mapping Management</h2>
-            <p>Manually maintain the mapping relationship between SAP IDs and customer document IDs here</p>
-            
+        <div id="mapping" class="tab-content">
             <table class="id-mapping-table">
                 <thead>
                     <tr>
@@ -412,247 +290,121 @@
                     </tr>
                 </tbody>
             </table>
-            
-            <div class="action-buttons">
-                <button onclick="saveMappings()">Save Mapping</button>
-                <button onclick="clearMappings()">Clear</button>
+            <button onclick="clearMappings()">Clear Mappings</button>
+        </div>
+        <div id="results" class="tab-content">
+            <div class="result-filters">
+                <label for="filter-customer">Filter by Customer:</label>
+                <input type="text" id="filter-customer">
+                <label for="filter-status">Filter by Status:</label>
+                <select id="filter-status">
+                    <option value="all">All</option>
+                    <option value="processed">Processed</option>
+                    <option value="error">Error</option>
+                </select>
             </div>
+            <table id="results-table">
+                <thead>
+                    <tr>
+                        <th>Customer Name</th>
+                        <th>Document Type</th>
+                        <th>Status</th>
+                        <th>Details</th>
+                    </tr>
+                </thead>
+                <tbody id="results-rows">
+                    <!-- Results will be displayed here -->
+                </tbody>
+            </table>
         </div>
     </div>
-    
-    <!-- Settings Modal -->
     <div id="settingsModal" class="modal">
         <div class="modal-content">
             <span class="close" onclick="closeSettings()">&times;</span>
-            <h2>Supplier Document Format Configuration</h2>
-            
+            <h2>Settings</h2>
             <div class="form-group">
-                <label for="new-supplier">Supplier Name:</label>
-                <input type="text" id="new-supplier" placeholder="Enter supplier name">
+                <label for="new-supplier">Customer Name:</label>
+                <input type="text" id="new-supplier">
             </div>
-            
             <div class="form-group">
                 <label for="doc-type">Document Type:</label>
                 <select id="doc-type" onchange="toggleFormatFields()">
-                    <option value="">Select Document Type</option>
                     <option value="excel">Excel</option>
                     <option value="image">Image</option>
                     <option value="email">Email</option>
                     <option value="pdf">PDF</option>
                 </select>
             </div>
-            
-            <!-- Excel specific fields -->
             <div id="excel-fields" style="display: none;">
-                <div class="form-group">
-                    <label>Excel Column Headers:</label>
-                    <div class="form-group-inline">
-                        <label for="col1-header">Column 1:</label>
-                        <input type="text" id="col1-header" placeholder="客户材料号" value="客户材料号">
-                    </div>
-                    <div class="form-group-inline">
-                        <label for="col2-header">Column 2:</label>
-                        <input type="text" id="col2-header" placeholder="客户单价" value="客户单价">
-                    </div>
-                    <div class="form-group-inline">
-                        <label for="col3-header">Column 3:</label>
-                        <input type="text" id="col3-header" placeholder="客户总价" value="客户总价">
-                    </div>
+                <div class="form-group-inline">
+                    <label for="col1-header">Column 1 Header:</label>
+                    <input type="text" id="col1-header" placeholder="客户材料号">
+                </div>
+                <div class="form-group-inline">
+                    <label for="col2-header">Column 2 Header:</label>
+                    <input type="text" id="col2-header" placeholder="客户单价">
+                </div>
+                <div class="form-group-inline">
+                    <label for="col3-header">Column 3 Header:</label>
+                    <input type="text" id="col3-header" placeholder="客户总价">
                 </div>
             </div>
-            
-            <!-- Image specific fields -->
             <div id="image-fields" style="display: none;">
                 <div class="form-group">
-                    <label for="image-prompt">Image Processing Prompt:</label>
-                    <textarea id="image-prompt" rows="3" placeholder="Enter prompt for image processing"></textarea>
+                    <label for="image-prompt">Prompt:</label>
+                    <input type="text" id="image-prompt" placeholder="Default image prompt">
                 </div>
             </div>
-            
-            <!-- Email specific fields -->
             <div id="email-fields" style="display: none;">
                 <div class="form-group">
-                    <label for="email-prompt">Email Processing Prompt:</label>
-                    <textarea id="email-prompt" rows="3" placeholder="Enter prompt for email processing"></textarea>
+                    <label for="email-prompt">Prompt:</label>
+                    <input type="text" id="email-prompt" placeholder="Default email prompt">
                 </div>
             </div>
-            
-            <!-- PDF specific fields -->
             <div id="pdf-fields" style="display: none;">
-                <div class="form-group">
-                    <label for="pdf-pages">Page Numbers:</label>
-                    <input type="text" id="pdf-pages" placeholder="e.g., 1,2,3 or 1-5">
+                <div class="form-group-inline">
+                    <label for="pdf-pages">Pages:</label>
+                    <input type="text" id="pdf-pages" placeholder="All pages">
                 </div>
-                <div class="form-group">
-                    <label for="pdf-prompt">PDF Processing Prompt:</label>
-                    <textarea id="pdf-prompt" rows="3" placeholder="Enter prompt for PDF processing"></textarea>
+                <div class="form-group-inline">
+                    <label for="pdf-prompt">Prompt:</label>
+                    <input type="text" id="pdf-prompt" placeholder="Default PDF prompt">
                 </div>
             </div>
-            
             <button onclick="addSupplierFormat()">Add Supplier Format</button>
-            
-            <h3>Configured Supplier Formats</h3>
             <table class="settings-table">
                 <thead>
                     <tr>
-                        <th>Supplier Name</th>
+                        <th>Customer Name</th>
                         <th>Document Type</th>
                         <th>Format Details</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody id="supplier-format-rows">
-                    <!-- Supplier format rows will be added here dynamically -->
+                    <!-- Supplier formats will be displayed here -->
                 </tbody>
             </table>
         </div>
     </div>
-
     <script>
-        // Tab switching functionality
-        function showTab(tabId) {
-            // Hide all tab contents
-            const tabContents = document.querySelectorAll('.tab-content');
-            tabContents.forEach(content => content.classList.remove('active'));
-            
-            // Remove active status from all tabs
-            const tabs = document.querySelectorAll('.tab');
-            tabs.forEach(tab => tab.classList.remove('active'));
-            
-            // Show selected tab content
-            document.getElementById(tabId).classList.add('active');
-            
-            // Activate selected tab
-            event.target.classList.add('active');
+        // 显示指定的标签页
+        function showTab(tabName) {
+            const tabs = document.getElementsByClassName('tab');
+            const tabContents = document.getElementsByClassName('tab-content');
+            for (let i = 0; i < tabs.length; i++) {
+                tabs[i].classList.remove('active');
+                tabContents[i].classList.remove('active');
+            }
+            document.getElementById(tabName).classList.add('active');
+            document.getElementById(tabName + '-content').classList.add('active');
         }
         
-        // Parse customer document
-        function parseCustomerDoc() {
-            const fileInput = document.getElementById('customer-file');
-            const supplier = document.getElementById('supplier').value;
-            const period = document.getElementById('customer-period').value;
-            
-            if (!fileInput.files.length) {
-                alert('Please select a customer document first');
-                return;
-            }
-            
-            if (!supplier) {
-                alert('Please select a supplier');
-                return;
-            }
-            
-            if (!period) {
-                alert('Please select a period');
-                return;
-            }
-            
-            // Simulate parsing process
-            alert('Parsing customer document...');
-            
-            // Simulate parsing results
-            const tbody = document.querySelector('#customer-data-table tbody');
-            tbody.innerHTML = `
-                <tr>
-                    <td>MAT-001</td>
-                    <td>£50.00</td>
-                    <td>£10,000.00</td>
-                    <td>200</td>
-                    <td>${document.getElementById('supplier').options[document.getElementById('supplier').selectedIndex].text}</td>
-                </tr>
-                <tr>
-                    <td>MAT-002</td>
-                    <td>£75.00</td>
-                    <td>£15,000.00</td>
-                    <td>200</td>
-                    <td>${document.getElementById('supplier').options[document.getElementById('supplier').selectedIndex].text}</td>
-                </tr>
-            `;
-            
-            alert('Customer document parsing completed');
-        }
-        
-        // Parse SAP document
-        function parseSapDoc() {
-            const fileInput = document.getElementById('sap-file');
-            const period = document.getElementById('sap-period').value;
-            
-            if (!fileInput.files.length) {
-                alert('Please select an SAP document first');
-                return;
-            }
-            
-            if (!period) {
-                alert('Please select a period');
-                return;
-            }
-            
-            // Simulate parsing process
-            alert('Parsing SAP document...');
-            
-            // Simulate parsing results
-            const tbody = document.querySelector('#sap-data-table tbody');
-            tbody.innerHTML = `
-                <tr>
-                    <td>SAP-2023-001</td>
-                    <td>£10,000.00</td>
-                </tr>
-                <tr>
-                    <td>SAP-2023-002</td>
-                    <td>£15,000.00</td>
-                </tr>
-            `;
-            
-            alert('SAP document parsing completed');
-        }
-        
-        // Start data processing
-        function startProcessing() {
-            let progress = 0;
-            const progressBar = document.getElementById('progress-fill');
-            const interval = setInterval(() => {
-                progress += 10;
-                progressBar.style.width = progress + '%';
-                progressBar.textContent = progress + '%';
-                
-                // Update step status
-                if (progress >= 33) {
-                    document.getElementById('step1-status').textContent = 'Completed';
-                }
-                if (progress >= 66) {
-                    document.getElementById('step2-status').textContent = 'Completed';
-                }
-                if (progress >= 100) {
-                    document.getElementById('step3-status').textContent = 'Completed';
-                    clearInterval(interval);
-                    alert('Data processing completed');
-                }
-            }, 300);
-        }
-        
-        // Filter results
-        function filterResults() {
-            const supplier = document.getElementById('result-supplier').value;
-            const period = document.getElementById('result-period').value;
-            
-            // Simulate filtering results
-            const tbody = document.querySelector('#aggregation-results tbody');
-            tbody.innerHTML = `
-                <tr>
-                    <td>${supplier ? document.getElementById('result-supplier').options[document.getElementById('result-supplier').selectedIndex].text : 'Supplier 1'}</td>
-                    <td>${period || '2023-01'}</td>
-                    <td>15</td>
-                    <td>12</td>
-                    <td>80%</td>
-                </tr>
-            `;
-        }
-        
-        // Add mapping row
+        // 添加映射行
         function addMappingRow() {
             const tbody = document.getElementById('mapping-rows');
-            const newRow = document.createElement('tr');
-            newRow.innerHTML = `
+            const row = document.createElement('tr');
+            row.innerHTML = `
                 <td><input type="text" placeholder="Enter SAP ID"></td>
                 <td><input type="text" placeholder="Enter Customer Document ID"></td>
                 <td>
@@ -660,20 +412,13 @@
                     <button class="remove-row-btn" onclick="removeMappingRow(this)">-</button>
                 </td>
             `;
-            tbody.appendChild(newRow);
+            tbody.appendChild(row);
         }
         
-        // Remove mapping row
+        // 移除映射行
         function removeMappingRow(button) {
             const row = button.closest('tr');
-            if (row) {
-                row.remove();
-            }
-        }
-        
-        // Save mappings
-        function saveMappings() {
-            alert('Mapping relationship saved');
+            row.remove();
         }
         
         // Clear mappings
@@ -732,7 +477,7 @@
             const docType = document.getElementById('doc-type').value;
             
             if (!supplierName || !docType) {
-                alert('Please enter supplier name and select document type');
+                alert('Please enter customer name and select document type');
                 return;
             }
             
