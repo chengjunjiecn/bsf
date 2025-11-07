@@ -1,0 +1,1021 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoice Assistant</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+            height: 100vh; /* 全屏高度 */
+            overflow: hidden; /* 隐藏滚动条 */
+        }
+        
+        .header {
+            background-color: #2c3e50;
+            color: white;
+            padding: 1rem;
+            text-align: center;
+            position: relative; /* 为设置按钮定位 */
+        }
+        
+        /* 设置按钮样式 */
+        .settings-btn {
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 8px 15px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .settings-btn:hover {
+            background-color: #2980b9;
+        }
+        
+        .container {
+            max-width: 100%; /* 全屏宽度 */
+            height: calc(100vh - 80px); /* 减去头部高度 */
+            margin: 0;
+            padding: 20px;
+            overflow-y: auto; /* 允许垂直滚动 */
+        }
+        
+        .nav-tabs {
+            display: flex;
+            background-color: #34495e;
+            margin-bottom: 20px;
+        }
+        
+        .tab {
+            padding: 15px 20px;
+            cursor: pointer;
+            color: white;
+            transition: background-color 0.3s;
+        }
+        
+        .tab:hover {
+            background-color: #4a678a;
+        }
+        
+        .tab.active {
+            background-color: #3498db;
+        }
+        
+        .tab-content {
+            display: none;
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            overflow-y: auto;
+            max-height: calc(100vh - 150px);
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        
+        input, select, textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        
+        button {
+            background-color: #3498db;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        
+        button:hover {
+            background-color: #2980b9;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        
+        th {
+            background-color: #f2f2f2;
+        }
+        
+        .progress-container {
+            margin: 20px 0;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            background-color: #e0e0e0;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 30px;
+            background-color: #3498db;
+            width: 0%;
+            transition: width 0.5s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+        
+        .result-filters {
+            margin-bottom: 20px;
+        }
+        
+        .id-mapping-table {
+            width: 100%;
+        }
+        
+        .id-mapping-table th, .id-mapping-table td {
+            padding: 8px;
+        }
+        
+        .action-buttons {
+            margin-top: 10px;
+        }
+        
+        .add-row-btn {
+            background-color: #27ae60;
+            margin-right: 10px;
+        }
+        
+        .remove-row-btn {
+            background-color: #e74c3c;
+        }
+        
+        /* 设置模态框样式 */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.4);
+        }
+        
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 800px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        
+        .close:hover {
+            color: black;
+        }
+        
+        .form-group-inline {
+            display: inline-block;
+            margin-right: 15px;
+        }
+        
+        .settings-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        
+        .settings-table th, .settings-table td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        
+        .settings-table th {
+            background-color: #f2f2f2;
+        }
+        
+        .user-section {
+            margin-bottom: 30px;
+        }
+        
+        .user-table, .audit-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        
+        .user-table th, .user-table td, .audit-table th, .audit-table td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        
+        .user-table th, .audit-table th {
+            background-color: #f2f2f2;
+        }
+        
+        .edit-user-btn {
+            background-color: #f39c12;
+            margin-right: 5px;
+        }
+        
+        .edit-user-btn:hover {
+            background-color: #e67e22;
+        }
+        
+        .delete-user-btn {
+            background-color: #e74c3c;
+        }
+        
+        .delete-user-btn:hover {
+            background-color: #c0392b;
+        }
+        
+        #user-form {
+            max-width: 500px;
+            margin: 20px 0;
+        }
+        
+        #user-form .form-group {
+            margin-bottom: 15px;
+        }
+        
+        #user-form label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        
+        #user-form input, #user-form select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        
+        #user-form input[type="checkbox"] {
+            width: auto;
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Invoice Assistant</h1>
+        <button class="settings-btn" onclick="openSettings()">Customer Document Setting</button>
+    </div>
+    
+    <div class="container">
+        <div class="nav-tabs">
+            <div class="tab active" onclick="showTab('customer-doc')">Customer Document Parsing</div>
+            <div class="tab" onclick="showTab('sap-doc')">SAP Document Parsing</div>
+            <div class="tab" onclick="showTab('processing')">Data Processing</div>
+            <div class="tab" onclick="showTab('results')">Aggregation Results</div>
+            <div class="tab" onclick="showTab('id-mapping')">ID Mapping Management</div>
+            
+        </div>
+        
+        <!-- Customer Document Parsing Interface -->
+        <div id="customer-doc" class="tab-content active">
+            <h2>Customer Document Parsing</h2>
+            <div class="form-group">
+                <label for="customer-folder">配置文件夹，自动从SharePoint获取:</label>
+                <input type="text" id="customer-folder" placeholder="请输入SharePoint文件夹路径">
+            </div>
+            
+            <div class="form-group">
+                <label for="supplier">Select Customer:</label>
+                <select id="supplier">
+                    <option value="">Please Select Customer</option>
+                    <option value="supplier1">Customer 1</option>
+                    <option value="supplier2">Customer 2</option>
+                    <option value="supplier3">Customer 3</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="customer-period">Select Period:</label>
+                <input type="month" id="customer-period">
+            </div>
+            
+            <button onclick="parseCustomerDoc()">获取并解析文档</button>
+            
+            <div id="customer-results">
+                <h3>Parsing Results</h3>
+                <table id="customer-data-table">
+                    <thead>
+                        <tr>
+                            <th>客户材料号</th>
+                            <th>客户单价</th>
+                            <th>客户总价</th>
+                            <th>客户数量</th>
+                            <th>Customer</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Parsing results will be displayed here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- SAP Document Parsing Interface -->
+        <div id="sap-doc" class="tab-content">
+            <h2>SAP Document Parsing</h2>
+            <div class="form-group">
+                <label for="sap-customer">选择客户，自动从EDL获取:</label>
+                <select id="sap-customer">
+                    <option value="">请选择客户</option>
+                    <option value="customer1">Customer 1</option>
+                    <option value="customer2">Customer 2</option>
+                    <option value="customer3">Customer 3</option>
+                    <option value="all">所有客户</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="sap-period">Select Period:</label>
+                <input type="month" id="sap-period">
+            </div>
+            
+            <button onclick="parseSapDoc()">获取并解析文档</button>
+            
+            <div id="sap-results">
+                <h3>Parsing Results</h3>
+                <table id="sap-data-table">
+                    <thead>
+                        <tr>
+                            <th>SAP料号</th>
+                            <th>SAP数量</th>
+                            <th>SAP单价</th>
+                            <th>SAP总价</th>
+                            <th>客户</th>
+
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Parsing results will be displayed here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- Data Processing Interface -->
+        <div id="processing" class="tab-content">
+            <h2>Data Processing</h2>
+            <button onclick="startProcessing()">Start Processing</button>
+            
+            <div class="progress-container">
+                <h3>Processing Progress</h3>
+                <div class="progress-bar">
+                    <div id="progress-fill" class="progress-fill">0%</div>
+                </div>
+            </div>
+            
+            <div id="processing-steps">
+                <h3>Processing Steps</h3>
+                <ul>
+                    <li id="step1">Customer Data Aggregation <span id="step1-status">Pending</span></li>
+                    <li id="step2">SAP Data Aggregation <span id="step2-status">Pending</span></li>
+                    <li id="step3">Data Matching <span id="step3-status">Pending</span></li>
+                </ul>
+            </div>
+        </div>
+        
+        <!-- Aggregation Results Interface -->
+        <div id="results" class="tab-content">
+            <h2>Aggregation Results</h2>
+            
+            <div class="result-filters">
+                <div class="form-group">
+                    <label for="result-supplier">Select Customer:</label>
+                    <select id="result-supplier">
+                        <option value="">All Customers</option>
+                        <option value="supplier1">Customer 1</option>
+                        <option value="supplier2">Customer 2</option>
+                        <option value="supplier3">Customer 3</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="result-period">Select Period:</label>
+                    <input type="month" id="result-period">
+                </div>
+                
+                <button onclick="filterResults()">Filter</button>
+            </div>
+            
+            <table id="aggregation-results">
+                <thead>
+                    <tr>
+                        <th>SAP料号</th><th>描述</th><th>SAP单价</th><th>SAP数量</th><th>SAP总价</th><th>客户料号</th><th>客户数量</th><th>客户总价</th><th>客户单价</th><th>CR数量</th><th>CR金额</th><th>单价一致性</th><th>价差</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Aggregation results will be displayed here -->
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- ID Mapping Management Interface -->
+        <div id="id-mapping" class="tab-content">
+            <h2>ID Mapping Management</h2>
+            <p>Manually maintain the mapping relationship between SAP IDs and customer document IDs here</p>
+            
+            <!-- Multi-line input for bulk mapping -->
+            <div class="form-group">
+                <label for="bulk-mapping">Bulk Input (SAP ID,Customer Document ID - one mapping per line):</label>
+                <textarea id="bulk-mapping" rows="5" placeholder="Enter mappings in format: SAP ID,Customer Document ID&#10;Example:&#10;SAP001,CUST001&#10;SAP002,CUST002"></textarea>
+                <button onclick="addBulkMappings()">Add Bulk Mappings</button>
+            </div>
+            
+            <table class="id-mapping-table">
+                <thead>
+                    <tr>
+                        <th>SAP ID</th>
+                        <th>Customer Document ID</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="mapping-rows">
+                    <tr>
+                        <td><input type="text" placeholder="Enter SAP ID"></td>
+                        <td><input type="text" placeholder="Enter Customer Document ID"></td>
+                        <td>
+                            <button class="add-row-btn" onclick="addMappingRow()">+</button>
+                            <button class="remove-row-btn" onclick="removeMappingRow(this)">-</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <div class="action-buttons">
+                <button onclick="saveMappings()">Save Mapping</button>
+                <button onclick="clearMappings()">Clear</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- User Management Interface -->
+    <div id="user-management" class="tab-content">
+        <h2>User Management</h2>
+        
+        <!-- User List Section -->
+        <div class="user-section">
+            <h3>User List</h3>
+            <table class="user-table">
+                <thead>
+                    <tr>
+                        <th>Username</th>
+                        <th>Role</th>
+                        <th>Status</th>
+                        <th>Last Login</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="user-list">
+                    <tr>
+                        <td>admin</td>
+                        <td>Administrator</td>
+                        <td>Active</td>
+                        <td>2023-10-15 14:30</td>
+                        <td>
+                            <button class="edit-user-btn" onclick="editUser('admin')">Edit</button>
+                            <button class="delete-user-btn" onclick="deleteUser('admin')">Delete</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>user1</td>
+                        <td>User</td>
+                        <td>Active</td>
+                        <td>2023-10-16 09:15</td>
+                        <td>
+                            <button class="edit-user-btn" onclick="editUser('user1')">Edit</button>
+                            <button class="delete-user-btn" onclick="deleteUser('user1')">Delete</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Add/Edit User Form -->
+        <div class="user-section">
+            <h3 id="user-form-title">Add New User</h3>
+            <form id="user-form">
+                <div class="form-group">
+                    <label for="username">Username:</label>
+                    <input type="text" id="username" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="user-role">Role:</label>
+                    <select id="user-role" required>
+                        <option value="user">User</option>
+                        <option value="administrator">Administrator</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="user-status">Status:</label>
+                    <select id="user-status" required>
+                        <option value="active">Active</option>
+                        <option value="inactive">Inactive</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="reset-password"> Reset password on next login
+                    </label>
+                </div>
+                
+                <div class="action-buttons">
+                    <button type="submit">Save User</button>
+                    <button type="button" onclick="cancelUserEdit()">Cancel</button>
+                </div>
+            </form>
+        </div>
+        
+        <!-- Audit Log Section -->
+        <div class="user-section">
+            <h3>Audit Logs</h3>
+            <table class="audit-table">
+                <thead>
+                    <tr>
+                        <th>Timestamp</th>
+                        <th>User</th>
+                        <th>Action</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>2023-10-16 10:30</td>
+                        <td>admin</td>
+                        <td>User Management</td>
+                        <td>Created new user 'user2'</td>
+                    </tr>
+                    <tr>
+                        <td>2023-10-15 14:30</td>
+                        <td>admin</td>
+                        <td>Login</td>
+                        <td>Successful login</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <!-- Settings Modal -->
+    <div id="settingsModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeSettings()">&times;</span>
+            <h2>Customer Document Format Configuration</h2>
+            
+            <div class="form-group">
+                <label for="new-supplier">Customer Name:</label>
+                <input type="text" id="new-supplier" placeholder="Enter customer name">
+            </div>
+            
+            <div class="form-group">
+                <label for="doc-type">Document Type:</label>
+                <select id="doc-type" onchange="toggleFormatFields()">
+                    <option value="">Select Document Type</option>
+                    <option value="excel">Excel</option>
+                    <option value="image">Image</option>
+                    <option value="email">Email</option>
+                    <option value="pdf">PDF</option>
+                </select>
+            </div>
+            
+            <!-- Excel specific fields -->
+            <div id="excel-fields" style="display: none;">
+                <div class="form-group">
+                    <label>Excel Column Headers:</label>
+                    <div class="form-group-inline">
+                        <label for="col1-header">Column 1:</label>
+                        <input type="text" id="col1-header" placeholder="客户材料号" value="客户材料号">
+                    </div>
+                    <div class="form-group-inline">
+                        <label for="col2-header">Column 2:</label>
+                        <input type="text" id="col2-header" placeholder="客户单价" value="客户单价">
+                    </div>
+                    <div class="form-group-inline">
+                        <label for="col3-header">Column 3:</label>
+                        <input type="text" id="col3-header" placeholder="客户总价" value="客户总价">
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Image specific fields -->
+            <div id="image-fields" style="display: none;">
+                <div class="form-group">
+                    <label for="image-prompt">Image Processing Prompt:</label>
+                    <textarea id="image-prompt" rows="3" placeholder="Enter prompt for image processing"></textarea>
+                </div>
+            </div>
+            
+            <!-- Email specific fields -->
+            <div id="email-fields" style="display: none;">
+                <div class="form-group">
+                    <label for="email-prompt">Email Processing Prompt:</label>
+                    <textarea id="email-prompt" rows="3" placeholder="Enter prompt for email processing"></textarea>
+                </div>
+            </div>
+            
+            <!-- PDF specific fields -->
+            <div id="pdf-fields" style="display: none;">
+                <div class="form-group">
+                    <label for="pdf-pages">Page Numbers:</label>
+                    <input type="text" id="pdf-pages" placeholder="e.g., 1,2,3 or 1-5">
+                </div>
+                <div class="form-group">
+                    <label for="pdf-prompt">PDF Processing Prompt:</label>
+                    <textarea id="pdf-prompt" rows="3" placeholder="Enter prompt for PDF processing"></textarea>
+                </div>
+            </div>
+            
+            <button onclick="addSupplierFormat()">Add Supplier Format</button>
+            
+            <h3>Configured Customer Formats</h3>
+            <table class="settings-table">
+                <thead>
+                    <tr>
+                        <th>Customer Name</th>
+                        <th>Document Type</th>
+                        <th>Format Details</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="supplier-format-rows">
+                    <!-- Supplier format rows will be added here dynamically -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // Tab switching functionality
+        function showTab(tabId) {
+            // Hide all tab contents
+            const tabContents = document.querySelectorAll('.tab-content');
+            tabContents.forEach(content => content.classList.remove('active'));
+            
+            // Remove active status from all tabs
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(tab => tab.classList.remove('active'));
+            
+            // Show selected tab content
+            document.getElementById(tabId).classList.add('active');
+            
+            // Activate selected tab
+            event.target.classList.add('active');
+        }
+        
+        // Parse customer document
+        function parseCustomerDoc() {
+            const folderPath = document.getElementById('customer-folder').value;
+            const supplier = document.getElementById('supplier').value;
+            const period = document.getElementById('customer-period').value;
+            
+            if (!folderPath) {
+                alert('请输入SharePoint文件夹路径');
+                return;
+            }
+            
+            if (!supplier) {
+                alert('请选择客户');
+                return;
+            }
+            
+            if (!period) {
+                alert('请选择期间');
+                return;
+            }
+            
+            // Simulate fetching and parsing process
+            alert('正在从SharePoint获取并解析客户文档...');
+            
+            // Simulate parsing results
+            const tbody = document.querySelector('#customer-data-table tbody');
+            tbody.innerHTML = `
+                <tr>
+                    <td>MAT-001</td>
+                    <td>£50.00</td>
+                    <td>£10,000.00</td>
+                    <td>200</td>
+                    <td>${document.getElementById('supplier').options[document.getElementById('supplier').selectedIndex].text}</td>
+                </tr>
+                <tr>
+                    <td>MAT-002</td>
+                    <td>£75.00</td>
+                    <td>£15,000.00</td>
+                    <td>200</td>
+                    <td>${document.getElementById('supplier').options[document.getElementById('supplier').selectedIndex].text}</td>
+                </tr>
+            `;
+            
+            alert('客户文档获取并解析完成');
+        }
+        
+        // Parse SAP document
+        function parseSapDoc() {
+            const customer = document.getElementById('sap-customer').value;
+            const period = document.getElementById('sap-period').value;
+            
+            if (!customer) {
+                alert('请选择客户');
+                return;
+            }
+            
+            if (!period) {
+                alert('请选择期间');
+                return;
+            }
+            
+            // Simulate fetching and parsing process from EDL
+            alert('正在从EDL获取并解析SAP文档...');
+            
+            // Simulate parsing results
+            const tbody = document.querySelector('#sap-data-table tbody');
+            tbody.innerHTML = `
+                <tr>
+                    <td>SAP-2023-001</td>
+                    <td>100</td>
+                    <td>£50.00</td>
+                    <td>£5,000.00</td>
+                    <td>${document.getElementById('sap-customer').options[document.getElementById('sap-customer').selectedIndex].text}</td>
+                </tr>
+                <tr>
+                    <td>SAP-2023-002</td>
+                    <td>200</td>
+                    <td>£75.00</td>
+                    <td>£15,000.00</td>
+                    <td>${document.getElementById('sap-customer').options[document.getElementById('sap-customer').selectedIndex].text}</td>
+                </tr>
+            `;
+            
+            alert('SAP文档获取并解析完成');
+        }
+        
+        // Start data processing
+        function startProcessing() {
+            let progress = 0;
+            const progressBar = document.getElementById('progress-fill');
+            const interval = setInterval(() => {
+                progress += 10;
+                progressBar.style.width = progress + '%';
+                progressBar.textContent = progress + '%';
+                
+                // Update step status
+                if (progress >= 33) {
+                    document.getElementById('step1-status').textContent = 'Completed';
+                }
+                if (progress >= 66) {
+                    document.getElementById('step2-status').textContent = 'Completed';
+                }
+                if (progress >= 100) {
+                    document.getElementById('step3-status').textContent = 'Completed';
+                    clearInterval(interval);
+                    alert('Data processing completed');
+                }
+            }, 300);
+        }
+        
+        // Filter results
+        function filterResults() {
+            const supplier = document.getElementById('result-supplier').value;
+            const period = document.getElementById('result-period').value;
+            
+            // Simulate filtering results
+            const tbody = document.querySelector('#aggregation-results tbody');
+            tbody.innerHTML = `
+                <tr>
+                    <td>${supplier ? document.getElementById('result-supplier').options[document.getElementById('result-supplier').selectedIndex].text : 'Customer 1'}</td>
+                    <td>${period || '2023-01'}</td>
+                    <td>15</td>
+                    <td>12</td>
+                    <td>80%</td>
+                </tr>
+            `;
+        }
+        
+        // Add mapping row
+        function addMappingRow() {
+            const tbody = document.getElementById('mapping-rows');
+            const newRow = document.createElement('tr');
+            newRow.innerHTML = `
+                <td><input type="text" placeholder="Enter SAP ID"></td>
+                <td><input type="text" placeholder="Enter Customer Document ID"></td>
+                <td>
+                    <button class="add-row-btn" onclick="addMappingRow()">+</button>
+                    <button class="remove-row-btn" onclick="removeMappingRow(this)">-</button>
+                </td>
+            `;
+            tbody.appendChild(newRow);
+        }
+        
+        // Remove mapping row
+        function removeMappingRow(button) {
+            const row = button.closest('tr');
+            if (row) {
+                row.remove();
+            }
+        }
+        
+        // Add bulk mappings
+        function addBulkMappings() {
+            const bulkInput = document.getElementById('bulk-mapping');
+            const mappings = bulkInput.value.split('\n');
+            const tbody = document.getElementById('mapping-rows');
+            
+            let addedCount = 0;
+            
+            mappings.forEach(mapping => {
+                // Skip empty lines
+                if (mapping.trim() === '') return;
+                
+                // Split by comma
+                const parts = mapping.split(',');
+                if (parts.length >= 2) {
+                    const sapId = parts[0].trim();
+                    const customerId = parts[1].trim();
+                    
+                    // Add new row
+                    const newRow = document.createElement('tr');
+                    newRow.innerHTML = `
+                        <td><input type="text" value="${sapId}"></td>
+                        <td><input type="text" value="${customerId}"></td>
+                        <td>
+                            <button class="add-row-btn" onclick="addMappingRow()">+</button>
+                            <button class="remove-row-btn" onclick="removeMappingRow(this)">-</button>
+                        </td>
+                    `;
+                    tbody.appendChild(newRow);
+                    addedCount++;
+                }
+            });
+            
+            // Clear the bulk input
+            bulkInput.value = '';
+            
+            if (addedCount > 0) {
+                alert(`成功添加 ${addedCount} 条映射记录`);
+            } else {
+                alert('未添加任何映射记录，请检查输入格式');
+            }
+        }
+        
+        // Save mappings
+        function saveMappings() {
+            alert('Mapping relationship saved');
+        }
+        
+        // Clear mappings
+        function clearMappings() {
+            if (confirm('Are you sure you want to clear all mapping relationships?')) {
+                const tbody = document.getElementById('mapping-rows');
+                tbody.innerHTML = `
+                    <tr>
+                        <td><input type="text" placeholder="Enter SAP ID"></td>
+                        <td><input type="text" placeholder="Enter Customer Document ID"></td>
+                        <td>
+                            <button class="add-row-btn" onclick="addMappingRow()">+</button>
+                            <button class="remove-row-btn" onclick="removeMappingRow(this)">-</button>
+                        </td>
+                    </tr>
+                `;
+            }
+        }
+        
+        // 打开设置功能
+        function openSettings() {
+            document.getElementById('settingsModal').style.display = 'block';
+        }
+        
+        // 关闭设置功能
+        function closeSettings() {
+            document.getElementById('settingsModal').style.display = 'none';
+        }
+        
+        // 点击模态框外部关闭
+        window.onclick = function(event) {
+            const modal = document.getElementById('settingsModal');
+            if (event.target == modal) {
+                modal.style.display = 'none';
+            }
+        }
+        
+        // 根据文档类型显示相应字段
+        function toggleFormatFields() {
+            // 隐藏所有特定字段
+            document.getElementById('excel-fields').style.display = 'none';
+            document.getElementById('image-fields').style.display = 'none';
+            document.getElementById('email-fields').style.display = 'none';
+            document.getElementById('pdf-fields').style.display = 'none';
+            
+            // 显示选中的文档类型字段
+            const docType = document.getElementById('doc-type').value;
+            if (docType) {
+                document.getElementById(docType + '-fields').style.display = 'block';
+            }
+        }
+        
+        // 添加供应商格式配置
+        function addSupplierFormat() {
+            const supplierName = document.getElementById('new-supplier').value;
+            const docType = document.getElementById('doc-type').value;
+            
+            if (!supplierName || !docType) {
+                alert('Please enter customer name and select document type');
+                return;
+            }
+            
+            let formatDetails = '';
+            switch(docType) {
+                case 'excel':
+                    const col1 = document.getElementById('col1-header').value || '客户材料号';
+                    const col2 = document.getElementById('col2-header').value || '客户单价';
+                    const col3 = document.getElementById('col3-header').value || '客户总价';
+                    formatDetails = `Columns: ${col1}, ${col2}, ${col3}`;
+                    break;
+                case 'image':
+                    formatDetails = `Prompt: ${document.getElementById('image-prompt').value || 'Default image prompt'}`;
+                    break;
+                case 'email':
+                    formatDetails = `Prompt: ${document.getElementById('email-prompt').value || 'Default email prompt'}`;
+                    break;
+                case 'pdf':
+                    const pages = document.getElementById('pdf-pages').value || 'All pages';
+                    const prompt = document.getElementById('pdf-prompt').value || 'Default PDF prompt';
+                    formatDetails = `Pages: ${pages}, Prompt: ${prompt}`;
+                    break;
+            }
+            
+            // 添加到表格
+            const tbody = document.getElementById('supplier-format-rows');
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${supplierName}</td>
+                <td>${docType.toUpperCase()}</td>
+                <td>${formatDetails}</td>
+                <td><button onclick="removeSupplierFormat(this)">Remove</button></td>
+            `;
+            tbody.appendChild(row);
+            
+            // 清空表单
+            document.getElementById('new-supplier').value = '';
+            document.getElementById('doc-type').value = '';
+            toggleFormatFields();
+        }
+        
+        // 移除供应商格式配置
+        function removeSupplierFormat(button) {
+            const row = button.closest('tr');
+            row.remove();
+        }
+        
+    </script>
+</body>
+</html>
